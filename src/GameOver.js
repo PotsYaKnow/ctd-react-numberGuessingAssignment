@@ -1,6 +1,7 @@
 import Button from "./Button";
 
 function GameOver({ hasWon, onReset }) {
+  console.log(hasWon)
   return (
     <div>
       {hasWon && <h2>Congratulation! You guessed my number.</h2>}
