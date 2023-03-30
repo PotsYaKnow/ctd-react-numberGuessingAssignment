@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useMemo, useState } from "react";
 import GuessControl from "./GuessControl";
 import GuessMessage from "./GuessMessage";
 import GameOver from "./GameOver";
@@ -11,67 +11,50 @@ function getRandomNumber() {
   return Math.floor(Math.random() * 100) + 1;
 }
 
-const MAX_ATTEMPTS = 5;
+const NumberGuessingGame = () => {
 
-class NumberGuessingGame extends Component {
-  constructor(props) {
-    super(props);
+   const [numberToGuess, setNumberToGuess ]= useState(getRandomNumber())
+   const [numberOfGuesses, setNumberOfGuesses] = useState(0);
+   const [latestGuess, setLatestGuess] = useState(null);
+   const [maxAttemps, setMaxAttempts] = useState(5);
 
-    this.state = {
-      numberToGuess: getRandomNumber(),
-      numberOfGuesses: 0,
-      latestGuess: null,
-    };
+   const handleGuess = (guess) => {
+    setLatestGuess(guess);
+    setNumberOfGuesses((prevNumberOfGuesses) => prevNumberOfGuesses + 1)
+   }
 
-    /**
-     * These lines are required to make the methods/functions declared on this
-     *  class have the correct `this` object when they run.
-     */
-    this.handleGuess = this.handleGuess.bind(this);
-    this.handleReset = this.handleReset.bind(this);
+
+   const handleReset = () => {
+    setNumberToGuess(getRandomNumber());
+    setNumberOfGuesses(0);
+    setLatestGuess(null);
+    setMaxAttempts(5)
   }
 
-  handleGuess(guess) {
-    this.setState({
-      latestGuess: guess,
-      numberOfGuesses: this.state.numberOfGuesses + 1,
-    });
-  }
+  const isCorrectGuess = useMemo(() => latestGuess === numberToGuess, [latestGuess, numberToGuess])
+  const isGameOver = useMemo(() => numberOfGuesses === maxAttemps, [numberOfGuesses, maxAttemps])
 
-  handleReset() {
-    this.setState({
-      numberToGuess: getRandomNumber(),
-      numberOfGuesses: 0,
-      latestGuess: null,
-    });
-  }
 
-  render() {
-    const isCorrectGuess = this.state.latestGuess === this.state.numberToGuess;
-
-    const isGameOver =
-      isCorrectGuess || this.state.numberOfGuesses === MAX_ATTEMPTS;
-
-    return (
-      <div>
+  return (
+    <div>
         <h2>I'm thinking of a number from 1 to 100.</h2>
         <h2>
-          Can you guess the number I am thinking of in {MAX_ATTEMPTS} tries?
+          Can you guess the number I am thinking of in {maxAttemps} tries?
         </h2>
-        <GuessControl onGuess={this.handleGuess} />
+
+        <GuessControl onGuess={handleGuess} />
         {isGameOver && (
-          <GameOver hasWon={isCorrectGuess} onReset={this.handleReset} />
+          <GameOver hasWon={isCorrectGuess} onReset={handleReset} />
         )}
         {!isGameOver && (
           <GuessMessage
-            guess={this.state.latestGuess}
-            numberToGuess={this.state.numberToGuess}
-            numberOfGuesses={this.state.numberOfGuesses}
+            guess={latestGuess}
+            numberToGuess={numberToGuess}
+            numberOfGuesses={numberOfGuesses}
           />
         )}
       </div>
-    );
-  }
+  )
 }
 
 export default NumberGuessingGame;
